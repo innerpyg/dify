@@ -578,6 +578,9 @@ services:
       ENABLE_WEBSITE_JINAREADER: ${ENABLE_WEBSITE_JINAREADER:-true}
       ENABLE_WEBSITE_FIRECRAWL: ${ENABLE_WEBSITE_FIRECRAWL:-true}
       ENABLE_WEBSITE_WATERCRAWL: ${ENABLE_WEBSITE_WATERCRAWL:-true}
+    volumes:
+      # Mount custom theme build
+      - ../web/.next:/app/web/.next:ro
   # The postgres database.
   db:
     image: postgres:15-alpine
@@ -593,10 +596,11 @@ services:
                -c 'work_mem=${POSTGRES_WORK_MEM:-4MB}'
                -c 'maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM:-64MB}'
                -c 'effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE:-4096MB}'
+               -c 'port=${DB_PORT:-5432}'
     volumes:
       - ./volumes/db/data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD', 'pg_isready', '-h', 'db', '-U', '${PGUSER:-postgres}', '-d', '${POSTGRES_DB:-dify}' ]
+      test: [ 'CMD', 'pg_isready', '-h', 'db', '-p', '${DB_PORT:-5432}', '-U', '${PGUSER:-postgres}', '-d', '${POSTGRES_DB:-dify}' ]
       interval: 1s
       timeout: 3s
       retries: 60
